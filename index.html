@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vulnerable Test Page</title>
+
+    <!-- Hardcoded secrets (SonarQube will detect these) -->
+    <!-- username: admin -->
+    <!-- password: admin123 -->
+    <script>
+        // Globally exposed API key (bad practice)
+        var API_KEY = "123456-SECRET-KEY-HARDCODED";
+
+        // Unsafe innerHTML assignment (XSS vulnerability)
+        function showMessage() {
+            var msg = location.hash.substring(1); 
+            document.getElementById("output").innerHTML = msg; 
+        }
+
+        // Duplicate function (SonarQube: duplicated code)
+        function duplicateFunction() {
+            var a = 1;
+            var b = 2;
+            var c = a + b;
+            console.log(c);
+        }
+        function duplicateFunction() {
+            var a = 1;
+            var b = 2;
+            var c = a + b;
+            console.log(c);
+        }
+
+        // SQL injection example (SonarQube flags use of unsafe SQL strings)
+        var userInput = "' OR 1=1 --";
+        var query = "SELECT * FROM users WHERE username = '" + userInput + "';";
+
+        // Unused variables
+        var unused1 = 123;
+        var unused2 = "hello";
+
+        // Insecure HTTP request (SonarQube will warn)
+        function insecureFetch() {
+            fetch("http://example.com/data")
+                .then(r => r.text())
+                .then(t => console.log(t));
+        }
+
+        // Eval usage (dangerous)
+        function runEval() {
+            eval("console.log('Eval is dangerous')");
+        }
+    </script>
+
+</head>
+
+<body onload="showMessage()">
+
+    <h1>Intentionally Vulnerable HTML Page</h1>
+
+    <p>Enter a message in the URL hash to test XSS:
+        <code>#&lt;script&gt;alert('XSS')&lt;/script&gt;</code>
+    </p>
+
+    <!-- Deprecated tag -->
+    <font color="red">This uses a deprecated font tag.</font>
+
+    <br><br>
+
+    <!-- Inline JavaScript handler (bad practice) -->
+    <button onclick="runEval()">Run Dangerous Eval()</button>
+
+    <button onclick="insecureFetch()">Call Insecure HTTP Request</button>
+
+    <div id="output"></div>
+
+    <!-- Comment that leaks sensitive info -->
+    <!-- AWS_SECRET_ACCESS_KEY = ABC123XYZ -->
+
+</body>
+</html>
